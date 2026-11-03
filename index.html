@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CRUD de Productos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="crt">
+  <!-- ══════ Title bar ══════ -->
+  <div class="title-bar">
+    <span>CRUD de Productos</span>
+    <span>v1.0</span>
+  </div>
+
+  <!-- ══════ Menu bar ══════ -->
+  <div class="menu-bar">
+    <span class="menu-item" id="menu-archivo">Archivo</span>
+    <span class="menu-item" id="menu-productos">Productos</span>
+    <span class="menu-item" id="menu-edicion">Edición</span>
+    <span class="menu-item" id="menu-ayuda">Ayuda</span>
+
+    <!-- Submenus (hidden by default) -->
+    <div class="submenu" id="submenu-archivo">
+      <div class="submenu-item" id="menu-export">Exportar JSON</div>
+      <div class="submenu-item" id="menu-import">Importar JSON</div>
+      <div class="submenu-sep"></div>
+      <div class="submenu-item" id="menu-salir">Salir</div>
+    </div>
+    <div class="submenu" id="submenu-productos">
+      <div class="submenu-item" id="menu-nuevo">Nuevo        F2</div>
+      <div class="submenu-item" id="menu-editar">Editar       F3</div>
+      <div class="submenu-item" id="menu-eliminar">Eliminar     F4</div>
+    </div>
+    <div class="submenu" id="submenu-edicion">
+      <div class="submenu-item" id="menu-buscar">Buscar...</div>
+      <div class="submenu-sep"></div>
+      <div class="submenu-item" id="menu-sort-recent">Ordenar: Más recientes</div>
+      <div class="submenu-item" id="menu-sort-name">Ordenar: Nombre (A–Z)</div>
+      <div class="submenu-item" id="menu-sort-price-asc">Ordenar: Precio ↑</div>
+      <div class="submenu-item" id="menu-sort-price-desc">Ordenar: Precio ↓</div>
+      <div class="submenu-item" id="menu-sort-stock">Ordenar: Stock ↑</div>
+    </div>
+    <div class="submenu" id="submenu-ayuda">
+      <div class="submenu-item">Acerca de...</div>
+    </div>
+  </div>
+
+  <!-- ══════ Search bar (hidden by default, toggled via Edición > Buscar) ══════ -->
+  <div id="search-bar" hidden>
+    <label for="search">Buscar:</label>
+    <input id="search" type="search" placeholder="nombre o categoría…" autocomplete="off">
+    <button class="crt-btn" id="search-close" type="button">[ Cerrar ]</button>
+  </div>
+
+  <!-- ══════ Main content: two panels ══════ -->
+  <div class="panels">
+    <!-- LEFT: Product list -->
+    <div class="panel panel-list">
+      <div class="panel-title">┤ Lista de Productos ├</div>
+      <div class="panel-border">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-id">ID</th>
+              <th class="col-name">Nombre</th>
+              <th class="col-cat">Categoría</th>
+              <th class="col-price">Precio</th>
+              <th class="col-stock">Stock</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div id="empty" class="empty-msg" hidden></div>
+        <nav id="pager" class="pager" aria-label="Paginación" hidden>
+          <button class="crt-btn" id="prev" type="button">[ ← Ant ]</button>
+          <span id="page-info" aria-live="polite"></span>
+          <button class="crt-btn" id="next" type="button">[ Sig → ]</button>
+        </nav>
+      </div>
+      <div class="panel-footer">
+        <span id="summary" aria-live="polite">Total de productos: 0</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: Product detail / form -->
+    <div class="panel panel-detail">
+      <div class="panel-title">┤ <span id="form-title">Detalle del Producto</span> ├</div>
+      <div class="panel-border">
+        <form id="form" novalidate>
+          <div class="form-row">
+            <label for="detail-id">ID:</label>
+            <input id="detail-id" type="text" readonly value="---" tabindex="-1">
+          </div>
+          <div class="form-row">
+            <label for="name">Nombre:</label>
+            <input id="name" name="name" maxlength="60" autocomplete="off" aria-describedby="err-name">
+            <span class="error" id="err-name" data-error="name"></span>
+          </div>
+          <div class="form-row">
+            <label for="category">Categoría:</label>
+            <select id="category" name="category"></select>
+          </div>
+          <div class="form-row">
+            <label for="price">Precio (ARS):</label>
+            <input id="price" name="price" type="number" step="0.01" min="0" inputmode="decimal" aria-describedby="err-price">
+            <span class="error" id="err-price" data-error="price"></span>
+          </div>
+          <div class="form-row">
+            <label for="stock">Stock:</label>
+            <input id="stock" name="stock" type="number" step="1" min="0" inputmode="numeric" aria-describedby="err-stock">
+            <span class="error" id="err-stock" data-error="stock"></span>
+          </div>
+          <div class="form-sep">- - - - - - - - - - - - - - - - - - - -</div>
+          <div class="form-row">
+            <label for="descripcion">Descripción:</label>
+            <textarea id="descripcion" name="descripcion" rows="3"></textarea>
+          </div>
+          <div class="form-buttons">
+            <button class="crt-btn primary" id="submit" type="submit">[ Guardar ]</button>
+            <button class="crt-btn" id="cancel" type="button" hidden>[ Cancelar ]</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ Notice bar ══════ -->
+  <p id="notice" class="notice" role="status" hidden></p>
+
+  <!-- ══════ Status bar ══════ -->
+  <div class="status-bar">
+    <span>F1: Ayuda&nbsp;&nbsp;F2: Nuevo&nbsp;&nbsp;F3: Editar&nbsp;&nbsp;F4: Eliminar&nbsp;&nbsp;ESC: Salir</span>
+    <span id="clock"></span>
+  </div>
+</div>
+
+<!-- ══════ Dialogs ══════ -->
+<dialog id="confirm">
+  <form method="dialog">
+    <p id="confirm-text"></p>
+    <div class="dialog-buttons">
+      <button class="crt-btn" value="cancel">[ Cancelar ]</button>
+      <button class="crt-btn danger" value="confirm">[ Eliminar ]</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="import-dialog">
+  <form method="dialog">
+    <p id="import-text"></p>
+    <p><small>Combinar suma los productos a los que ya tenés (si el id coincide, se actualiza). Reemplazar borra los actuales.</small></p>
+    <div class="dialog-buttons">
+      <button class="crt-btn" value="cancel">[ Cancelar ]</button>
+      <button class="crt-btn" value="merge">[ Combinar ]</button>
+      <button class="crt-btn danger" value="replace">[ Reemplazar ]</button>
+    </div>
+  </form>
+</dialog>
+<input id="import-file" type="file" accept=".json,application/json" hidden>
+<input id="sort" type="hidden" value="recent">
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
